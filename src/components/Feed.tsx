@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import TweetCard from "./TweetCard";
+import Tweetcomposer from "./Tweetcomposer";
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState<"foryou" | "following">("foryou");
@@ -18,8 +19,7 @@ const Feed = () => {
       likes: 1200,
       comments: 89,
       reposts: 324,
-      avatar:
-       "https://randomuser.me/api/portraits/men/45.jpg", // Business leader avatar
+      avatar: "https://randomuser.me/api/portraits/men/45.jpg",
     },
     {
       id: 2,
@@ -33,7 +33,7 @@ const Feed = () => {
       comments: 12,
       reposts: 23,
       avatar:
-        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=200&q=80", // Female tech avatar
+        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=200&q=80",
     },
     {
       id: 3,
@@ -49,7 +49,7 @@ const Feed = () => {
       comments: 34,
       reposts: 57,
       avatar:
-        "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=200&q=80", // Designer avatar
+        "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?auto=format&fit=crop&w=200&q=80",
     },
     {
       id: 4,
@@ -63,7 +63,7 @@ const Feed = () => {
       comments: 18,
       reposts: 42,
       avatar:
-        "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=200&q=80", // Developer avatar
+        "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=200&q=80",
     },
     {
       id: 5,
@@ -77,7 +77,7 @@ const Feed = () => {
       comments: 9,
       reposts: 14,
       avatar:
-        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80", // Finance avatar
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80",
     },
   ];
 
@@ -99,6 +99,7 @@ const Feed = () => {
           >
             For you
           </button>
+
           <button
             onClick={() => setActiveTab("following")}
             className={`flex-1 text-center py-3 font-medium hover:bg-gray-900 transition ${
@@ -111,6 +112,9 @@ const Feed = () => {
           </button>
         </div>
       </div>
+
+      {/* ✅ Tweet Composer goes here — below tabs, above tweets */}
+      <Tweetcomposer />
 
       {/* Feed content */}
       <div>

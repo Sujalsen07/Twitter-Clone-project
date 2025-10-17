@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MessageCircle, Repeat2, Heart, Upload } from "lucide-react";
+import * as Avatar from "@radix-ui/react-avatar"; // Import Radix Avatar
 
 interface Tweet {
   id: number;
@@ -21,11 +22,21 @@ const TwitterCard = ({ tweet }: { tweet: Tweet }) => {
   return (
     <div className="border-b border-gray-800 p-4 hover:bg-gray-900 transition">
       <div className="flex gap-3">
-        <img
-          src={tweet.avatar}
-          alt={tweet.name}
-          className="w-10 h-10 rounded-full"
-        />
+        {/* Radix Avatar */}
+        <Avatar.Root className="w-10 h-10 rounded-full overflow-hidden">
+          <Avatar.Image
+            src={tweet.avatar}
+            alt={tweet.name}
+            className="w-full h-full object-cover"
+          />
+          <Avatar.Fallback
+            className="w-full h-full flex items-center justify-center bg-gray-700 text-gray-100"
+            delayMs={600}
+          >
+            {tweet.name[0]}
+          </Avatar.Fallback>
+        </Avatar.Root>
+
         <div className="flex-1">
           {/* Header */}
           <div className="flex items-center gap-1 text-sm">
