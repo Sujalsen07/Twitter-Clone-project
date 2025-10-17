@@ -6,6 +6,7 @@ import { Apple } from "lucide-react";
 import { Button } from "./ui/button";
 import Authmodel from "./Authmodel"; // Make sure this file exists (and is named exactly like this)
 import { useAuth } from "@/context/AuthContext";
+import Feed from "./Feed";
 
 const Landing = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -17,7 +18,7 @@ const Landing = () => {
     setShowAuthModal(true);
   };
   if(user){
-    return <div>feed page</div>
+    return <Feed/>
   }
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-black text-white">
