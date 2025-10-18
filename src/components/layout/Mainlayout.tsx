@@ -5,6 +5,7 @@ import LoadingSpinner from '../loading-spinner';
 
 import Sidebar from './Sidebar';
 import Rightsidebar from './Rightsidebar'; // <-- import your right sidebar
+import ProfilePage from '../ProfilePage';
 
 const Mainlayout = ({ children }: any) => {
     const { user, isloading } = useAuth();
@@ -32,7 +33,7 @@ const Mainlayout = ({ children }: any) => {
 
             {/* Main Content */}
             <main className='flex-1 border-x border-gray-800 max-w-2xl'>
-                {children}
+                {currentPage=== "profile"? <ProfilePage/> :children}
             </main>
 
             {/* Right Sidebar */}
