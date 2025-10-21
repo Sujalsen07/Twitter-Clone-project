@@ -11,7 +11,7 @@ function HomeContent() {
     <Mainlayout>
       <Landing />
       {/* Example usage of user */}
-      {/* <p className="text-white">Welcome, {user ? user.name : "Guest"}</p> */}
+      {/* <p className="text-white">Welcome, {user ? user.name : "Guest"}</p> */} 
     </Mainlayout>
   );
 }

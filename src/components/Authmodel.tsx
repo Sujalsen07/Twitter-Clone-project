@@ -65,6 +65,7 @@ const Authmodel = ({ isOpen, onClose, initialMode = "login" }: any) => {
     e.preventDefault();
     
     if(!validateForm()|| isloading) return; // stop if invalid or loading
+    
 
     try {
       if (mode === "login") {

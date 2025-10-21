@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { ArrowLeft, Globe, Link, CalendarDays, Camera } from "lucide-react";
 import TweetCard from "./TweetCard";
+import Editprofile from "./Editprofile";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const ProfilePage = () => {
 
   if (!user) return null;
 
-  // Mock tweet data
+  // 🧩 Mock tweet data
   const tweets = [
     {
       id: 1,
@@ -96,7 +97,7 @@ const ProfilePage = () => {
             <p className="text-gray-500">@yourhandle</p>
           </div>
 
-          {/* ✅ Edit Profile Button moved below banner */}
+          {/* ✅ Edit Profile Button (correct placement) */}
           <Button
             variant="outline"
             className="text-white border-gray-600 bg-black/40 backdrop-blur-sm hover:bg-gray-800"
@@ -154,6 +155,15 @@ const ProfilePage = () => {
           </p>
         )}
       </div>
+
+      {/* ✅ Edit Profile Modal (fixed props & syntax) */}
+      {showEditModal && (
+<Editprofile
+  isOpen={showEditModal}
+  onClose={() => setShowEditModal(false)}
+/>
+
+      )}
     </div>
   );
 };

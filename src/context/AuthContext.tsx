@@ -20,7 +20,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<void>;
-  updatProfile: (profileData: {
+  updateProfile: (profileData: {
     displayName?: string;
     bio?: string;
     avatar?: string;
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsloading(false);
   };
 
-  const updatProfile = async (
+  const updateProfile = async (
     profileData: {
       displayName?: string;
       bio?: string;
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
   return (
     <AuthContext.Provider
-      value={{ user, login, signup, logout, updatProfile, isloading }}
+      value={{ user, login, signup, logout, updateProfile, isloading }}
     >
       {children}
     </AuthContext.Provider>
