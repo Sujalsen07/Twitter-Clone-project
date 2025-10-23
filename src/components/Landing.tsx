@@ -11,7 +11,7 @@ import Feed from "./Feed";
 const Landing = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-    const { user, logout } = useAuth();
+    const { user, logout, googlesignin } = useAuth();
   
   const openAuthModal = (mode: "login" | "signup") => {
     setAuthMode(mode);
@@ -38,7 +38,7 @@ const Landing = () => {
           <Button
             variant="outline"
             className="flex items-center justify-center gap-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition"
-            onClick={() => openAuthModal("signup")}
+            onClick={() => googlesignin()}
           >
             <FcGoogle size={20} />
             Sign up with Google
@@ -48,7 +48,7 @@ const Landing = () => {
           <Button
             variant="outline"
             className="flex items-center justify-center gap-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition"
-            onClick={() => openAuthModal("signup")}
+           onClick={() => googlesignin()}
           >
             <Apple size={20} className="text-black" />
             Sign up with Apple
