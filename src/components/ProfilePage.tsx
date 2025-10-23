@@ -8,19 +8,19 @@ import TweetCard from "./TweetCard";
 import Editprofile from "./Editprofile";
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, isloading } = useAuth();
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
 
-  if (!user) return null;
+  if (!user || isloading) return null;
 
-  // 🧩 Mock tweet data
+  // 🧩 Tweets mock data
   const tweets = [
     {
       id: 1,
       authorId: "user123",
-      name: user.displayName || "erfdgb",
-      username: "@yourhandle",
+      name: user.displayName || "User",
+      username: `@${user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}`,
       time: "2h",
       content: "Just setting up my Next.js Twitter clone 🚀",
       likes: 24,
@@ -31,11 +31,10 @@ const ProfilePage = () => {
     {
       id: 2,
       authorId: "user123",
-      name: user.displayName || "erfdgb",
-      username: "@yourhandle",
+      name: user.displayName || "User",
+      username: `@${user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}`,
       time: "1d",
-      content:
-        "Loving the new Tailwind + shadcn/ui combo. Design feels effortless.",
+      content: "Loving the new Tailwind + shadcn/ui combo. Design feels effortless.",
       likes: 52,
       comments: 8,
       reposts: 10,
@@ -53,7 +52,7 @@ const ProfilePage = () => {
           <ArrowLeft className="w-5 h-5 text-white" />
         </Button>
         <div>
-          <h1 className="text-lg font-bold">{user.displayName || "erfdgb"}</h1>
+          <h1 className="text-lg font-bold">{user.displayName || "User"}</h1>
           <p className="text-sm text-gray-500">{filteredTweets.length} posts</p>
         </div>
       </div>
@@ -91,13 +90,12 @@ const ProfilePage = () => {
       <div className="p-4 sm:p-6 border-b border-gray-800 mt-2 relative">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-semibold mt-2">
-              {user.displayName || "erfdgb"}
-            </h2>
-            <p className="text-gray-500">@yourhandle</p>
+            <h2 className="text-xl font-semibold mt-2">{user.displayName || "User"}</h2>
+            <p className="text-gray-500">
+              @{user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}
+            </p>
           </div>
 
-          {/* ✅ Edit Profile Button (correct placement) */}
           <Button
             variant="outline"
             className="text-white border-gray-600 bg-black/40 backdrop-blur-sm hover:bg-gray-800"
@@ -113,10 +111,7 @@ const ProfilePage = () => {
           </span>
           <span className="flex items-center gap-1">
             <Link size={15} />{" "}
-            <a
-              href="https://example.com"
-              className="text-blue-400 hover:underline"
-            >
+            <a href="https://example.com" className="text-blue-400 hover:underline">
               example.com
             </a>
           </span>
@@ -146,24 +141,14 @@ const ProfilePage = () => {
       {/* Posts */}
       <div>
         {filteredTweets.length > 0 ? (
-          filteredTweets.map((tweet) => (
-            <TweetCard key={tweet.id} tweet={tweet} />
-          ))
+          filteredTweets.map((tweet) => <TweetCard key={tweet.id} tweet={tweet} />)
         ) : (
-          <p className="text-center text-gray-500 py-10">
-            No tweets yet. Start tweeting!
-          </p>
+          <p className="text-center text-gray-500 py-10">No tweets yet. Start tweeting!</p>
         )}
       </div>
 
-      {/* ✅ Edit Profile Modal (fixed props & syntax) */}
-      {showEditModal && (
-<Editprofile
-  isOpen={showEditModal}
-  onClose={() => setShowEditModal(false)}
-/>
-
-      )}
+      {/* Edit Profile Modal */}
+      {showEditModal && <Editprofile isOpen={showEditModal} onClose={() => setShowEditModal(false)} />}
     </div>
   );
 };

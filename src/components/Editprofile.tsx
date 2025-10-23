@@ -3,8 +3,8 @@
 import { useAuth } from "@/context/AuthContext";
 import React, { useState, useRef } from "react";
 import { X, Camera } from "lucide-react";
+import axios from "axios";
 
-// Extend the User type with additional fields
 interface ExtendedUser {
   displayName?: string;
   bio?: string;
@@ -21,7 +21,7 @@ interface EditProfileProps {
 
 const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
   const { user, updateProfile } = useAuth();
-  const currentUser: ExtendedUser = user || {}; // Type assertion
+  const currentUser: ExtendedUser = user || {};
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,24 +45,46 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // Handle image change
-  const handleImageChange = (
+  // 🧠 Function to upload image to ImgBB
+  // 🧠 Upload image to ImgBB and return its URL
+const uploadToImgbb = async (file: File) => {
+  const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY!;
+  const data = new FormData();
+  data.append("image", file);
+
+  try {
+    const res = await axios.post(`https://api.imgbb.com/1/upload?key=6e2da936b3c81c400a18a70e58526f6b`, data);
+    return res.data.data.url; // ✅ Hosted image URL
+  } catch (error: any) {
+    console.error("❌ ImgBB upload failed:", error.response?.data || error.message);
+    throw new Error("Image upload failed");
+  }
+};
+
+
+  // Handle image change and upload to ImgBB
+  const handleImageChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "avatar" | "banner"
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (type === "avatar") {
-          setPreviewAvatar(reader.result as string);
-          setFormData({ ...formData, avatar: reader.result as string });
-        } else {
-          setPreviewBanner(reader.result as string);
-          setFormData({ ...formData, banner: reader.result as string });
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      setIsLoading(true);
+      const imageUrl = await uploadToImgbb(file);
+
+      if (type === "avatar") {
+        setPreviewAvatar(imageUrl);
+        setFormData((prev) => ({ ...prev, avatar: imageUrl }));
+      } else {
+        setPreviewBanner(imageUrl);
+        setFormData((prev) => ({ ...prev, banner: imageUrl }));
+      }
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,11 +122,7 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
 
         {/* Banner */}
         <div className="relative h-32 sm:h-40 bg-gray-800">
-          <img
-            src={previewBanner}
-            alt="Banner"
-            className="w-full h-full object-cover"
-          />
+          <img src={previewBanner} alt="Banner" className="w-full h-full object-cover" />
           <button
             onClick={() => bannerInputRef.current?.click()}
             className="absolute inset-0 flex justify-center items-center bg-black/30 hover:bg-black/50 transition"
@@ -154,9 +172,7 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
               maxLength={50}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.displayName}
-              onChange={(e) =>
-                setFormData({ ...formData, displayName: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
             />
           </div>
 
@@ -168,9 +184,7 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
               maxLength={160}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 resize-none focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             />
           </div>
 
@@ -182,9 +196,7 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
               maxLength={30}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
           </div>
 
@@ -196,9 +208,7 @@ const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
               maxLength={50}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.website}
-              onChange={(e) =>
-                setFormData({ ...formData, website: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
             />
           </div>
         </div>
