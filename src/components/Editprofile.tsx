@@ -1,18 +1,9 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { X, Camera } from "lucide-react";
 import axios from "axios";
-
-interface ExtendedUser {
-  displayName?: string;
-  bio?: string;
-  avatar?: string;
-  banner?: string;
-  location?: string;
-  website?: string;
-}
 
 interface EditProfileProps {
   isOpen: boolean;
@@ -21,58 +12,74 @@ interface EditProfileProps {
 
 const Editprofile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
   const { user, updateProfile } = useAuth();
-  const currentUser: ExtendedUser = user || {};
-
   const [isLoading, setIsLoading] = useState(false);
 
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
   const [formData, setFormData] = useState({
-    displayName: currentUser.displayName || "",
-    bio: currentUser.bio || "",
-    location: currentUser.location || "",
-    website: currentUser.website || "",
-    avatar: currentUser.avatar || "",
-    banner: currentUser.banner || "",
+    displayName: "",
+    bio: "",
+    location: "",
+    website: "",
+    avatar: "",
+    banner: "",
   });
 
-  const [previewAvatar, setPreviewAvatar] = useState(currentUser.avatar || "");
+  const [previewAvatar, setPreviewAvatar] = useState("");
   const [previewBanner, setPreviewBanner] = useState(
-    currentUser.banner ||
-      "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1000&q=80"
+    "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1000&q=80"
   );
+
+  // 🧠 Load current user data into form
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        displayName: user.displayName || "",
+        bio: user.bio || "",
+        location: user.location || "",
+        website: user.website || "",
+        avatar: user.avatar || "",
+        banner:
+          user.banner ||
+          "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1000&q=80",
+      });
+      setPreviewAvatar(user.avatar || "");
+      setPreviewBanner(
+        user.banner ||
+          "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1000&q=80"
+      );
+    }
+  }, [user]);
 
   if (!isOpen) return null;
 
-  // 🧠 Function to upload image to ImgBB
-  // 🧠 Upload image to ImgBB and return its URL
-const uploadToImgbb = async (file: File) => {
-  const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY!;
-  const data = new FormData();
-  data.append("image", file);
+  // 🖋️ Handle text input changes
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  try {
-    const res = await axios.post(`https://api.imgbb.com/1/upload?key=6e2da936b3c81c400a18a70e58526f6b`, data);
-    return res.data.data.url; // ✅ Hosted image URL
-  } catch (error: any) {
-    console.error("❌ ImgBB upload failed:", error.response?.data || error.message);
-    throw new Error("Image upload failed");
-  }
-};
-
-
-  // Handle image change and upload to ImgBB
-  const handleImageChange = async (
+  // 📸 Handle image uploads (Avatar or Banner)
+  const handlePhotoUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "avatar" | "banner"
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
-      const imageUrl = await uploadToImgbb(file);
+      const data = new FormData();
+      data.append("image", file);
+
+      const res = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
+        data
+      );
+
+      const imageUrl = res.data?.data?.display_url;
+      if (!imageUrl) throw new Error("Image upload failed");
 
       if (type === "avatar") {
         setPreviewAvatar(imageUrl);
@@ -81,17 +88,34 @@ const uploadToImgbb = async (file: File) => {
         setPreviewBanner(imageUrl);
         setFormData((prev) => ({ ...prev, banner: imageUrl }));
       }
-    } catch (err) {
-      console.error("Image upload failed:", err);
+    } catch (error: any) {
+      console.error("❌ Image upload failed:", error.message || error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 💾 Save updated profile
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      await updateProfile(formData);
+      const updatedUser = await updateProfile(formData);
+
+      if (updatedUser) {
+        setFormData({
+          displayName: updatedUser.displayName || "",
+          bio: updatedUser.bio || "",
+          location: updatedUser.location || "",
+          website: updatedUser.website || "",
+          avatar: updatedUser.avatar || "",
+          banner:
+            updatedUser.banner ||
+            "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1000&q=80",
+        });
+        setPreviewAvatar(updatedUser.avatar || "");
+        setPreviewBanner(updatedUser.banner || previewBanner);
+      }
+
       onClose();
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -100,6 +124,7 @@ const uploadToImgbb = async (file: File) => {
     }
   };
 
+  // 🖼️ UI
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
       <div className="bg-black rounded-2xl w-[95%] sm:w-[500px] max-h-[90vh] overflow-y-auto relative text-white">
@@ -122,7 +147,11 @@ const uploadToImgbb = async (file: File) => {
 
         {/* Banner */}
         <div className="relative h-32 sm:h-40 bg-gray-800">
-          <img src={previewBanner} alt="Banner" className="w-full h-full object-cover" />
+          <img
+            src={previewBanner}
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
           <button
             onClick={() => bannerInputRef.current?.click()}
             className="absolute inset-0 flex justify-center items-center bg-black/30 hover:bg-black/50 transition"
@@ -134,7 +163,7 @@ const uploadToImgbb = async (file: File) => {
             accept="image/*"
             ref={bannerInputRef}
             className="hidden"
-            onChange={(e) => handleImageChange(e, "banner")}
+            onChange={(e) => handlePhotoUpload(e, "banner")}
           />
         </div>
 
@@ -157,7 +186,7 @@ const uploadToImgbb = async (file: File) => {
               accept="image/*"
               ref={avatarInputRef}
               className="hidden"
-              onChange={(e) => handleImageChange(e, "avatar")}
+              onChange={(e) => handlePhotoUpload(e, "avatar")}
             />
           </div>
         </div>
@@ -172,7 +201,9 @@ const uploadToImgbb = async (file: File) => {
               maxLength={50}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.displayName}
-              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+              onChange={(e) =>
+                handleInputChange("displayName", e.target.value)
+              }
             />
           </div>
 
@@ -184,7 +215,7 @@ const uploadToImgbb = async (file: File) => {
               maxLength={160}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 resize-none focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              onChange={(e) => handleInputChange("bio", e.target.value)}
             />
           </div>
 
@@ -196,7 +227,7 @@ const uploadToImgbb = async (file: File) => {
               maxLength={30}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={(e) => handleInputChange("location", e.target.value)}
             />
           </div>
 
@@ -208,7 +239,7 @@ const uploadToImgbb = async (file: File) => {
               maxLength={50}
               className="w-full bg-transparent border border-gray-700 rounded-lg px-3 py-2 mt-1 focus:ring-1 focus:ring-blue-500 outline-none"
               value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              onChange={(e) => handleInputChange("website", e.target.value)}
             />
           </div>
         </div>

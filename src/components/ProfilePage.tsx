@@ -1,48 +1,38 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { ArrowLeft, Globe, Link, CalendarDays, Camera } from "lucide-react";
 import TweetCard from "./TweetCard";
 import Editprofile from "./Editprofile";
+import axios from "axios";
 
 const ProfilePage = () => {
-  const { user, isloading } = useAuth();
+  const { user, isLoading } = useAuth(); // ✅ use correct isLoading from context
+
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [tweets, setTweets] = useState<any[]>([]);
 
-  if (!user || isloading) return null;
+  // Fetch user's tweets from backend
+  useEffect(() => {
+    if (!user?._id) return;
 
-  // 🧩 Tweets mock data
-  const tweets = [
-    {
-      id: 1,
-      authorId: "user123",
-      name: user.displayName || "User",
-      username: `@${user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}`,
-      time: "2h",
-      content: "Just setting up my Next.js Twitter clone 🚀",
-      likes: 24,
-      comments: 3,
-      reposts: 5,
-      avatar: user.avatar || "https://randomuser.me/api/portraits/men/45.jpg",
-    },
-    {
-      id: 2,
-      authorId: "user123",
-      name: user.displayName || "User",
-      username: `@${user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}`,
-      time: "1d",
-      content: "Loving the new Tailwind + shadcn/ui combo. Design feels effortless.",
-      likes: 52,
-      comments: 8,
-      reposts: 10,
-      avatar: user.avatar || "https://randomuser.me/api/portraits/men/45.jpg",
-    },
-  ];
+    const fetchTweets = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/tweets/user/${user._id}`);
+        setTweets(res.data);
+      } catch (err) {
+        console.error("Error fetching profile tweets:", err);
+      }
+    };
 
-  const filteredTweets = tweets.filter((tweet) => tweet.authorId === "user123");
+    fetchTweets();
+  }, [user?._id]);
+
+  // Show nothing while loading or no user
+  if (isLoading || !user) return null;
 
   return (
     <div className="max-w-2xl mx-auto bg-black text-white min-h-screen border-x border-gray-800">
@@ -53,7 +43,7 @@ const ProfilePage = () => {
         </Button>
         <div>
           <h1 className="text-lg font-bold">{user.displayName || "User"}</h1>
-          <p className="text-sm text-gray-500">{filteredTweets.length} posts</p>
+          <p className="text-sm text-gray-500">{tweets.length} posts</p>
         </div>
       </div>
 
@@ -95,7 +85,6 @@ const ProfilePage = () => {
               @{user.username || user.displayName?.split(" ")[0]?.toLowerCase() || "user"}
             </p>
           </div>
-
           <Button
             variant="outline"
             className="text-white border-gray-600 bg-black/40 backdrop-blur-sm hover:bg-gray-800"
@@ -107,12 +96,12 @@ const ProfilePage = () => {
 
         <div className="flex flex-wrap gap-3 text-gray-400 text-sm mt-3">
           <span className="flex items-center gap-1">
-            <Globe size={15} /> Earth
+            <Globe size={15} /> {user.location ?? "Earth"}
           </span>
           <span className="flex items-center gap-1">
             <Link size={15} />{" "}
-            <a href="https://example.com" className="text-blue-400 hover:underline">
-              example.com
+            <a href={user.website || "#"} className="text-blue-400 hover:underline">
+              {user.website || "example.com"}
             </a>
           </span>
           <span className="flex items-center gap-1">
@@ -140,8 +129,8 @@ const ProfilePage = () => {
 
       {/* Posts */}
       <div>
-        {filteredTweets.length > 0 ? (
-          filteredTweets.map((tweet) => <TweetCard key={tweet.id} tweet={tweet} />)
+        {tweets.length > 0 ? (
+          tweets.map((tweet) => <TweetCard key={tweet._id} tweet={tweet} />)
         ) : (
           <p className="text-center text-gray-500 py-10">No tweets yet. Start tweeting!</p>
         )}
